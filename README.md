@@ -10,7 +10,7 @@ $ git clone <repo link>
 ```
 
 ```
-$ python AC.py 
+$ python main.py 
 ```
 
 
@@ -58,4 +58,4 @@ $ python AC.py --n 15 --m 15 --nt 14 --mt 14 --episodes 1000 --hidden 64 --gcn_l
 
 ## Acknowledgments
 
-* **Chandra Shekar Lakshminarayan**
+* **Dr.Chandra Shekar Lakshminarayan**
