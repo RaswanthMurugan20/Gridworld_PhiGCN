@@ -1,6 +1,6 @@
 # Reward Progpagation using Graph Convolutional Networks in GridWorld
 
-The repository contains the code for running the experiments in the paper [Reward Propagation using Graph Convolutional Networks](https://arxiv.org/abs/2010.02474) using the Proto Value Functions. The implementation is based on a few source codes: Thomas Kipf's [pytorch GCN implementation](https://github.com/tkipf/pygcn). The environment currently is only a GridWorld and all the results have been produced using this environment. The actor critic network implementation was not from any library but our own implementation using linear function approximators.
+The repository contains the code for running the experiments on sparse reward environments in 2D-Gridworld, based on the paper [Reward Propagation using Graph Convolutional Networks](https://arxiv.org/abs/2010.02474) using the Proto Value Functions [Mahadevan and Maggioni](https://www.jmlr.org/papers/volume8/mahadevan07a/mahadevan07a.pdf) as features to the GCN. The underlying MDP of the Gridworld is captured as a graph whihc is then used to calculate the Proto Value Functions.The implementation is GCN is baseed on Thomas Kipf's [pytorch GCN implementation](https://github.com/tkipf/pygcn). The environment currently is only a GridWorld and all the results have been produced using this environment. The actor critic network implementation was not from any library but our own implementation using linear function approximators. 
 
 ## Getting Started
 
@@ -58,4 +58,4 @@ $ python AC.py --n 15 --m 15 --nt 14 --mt 14 --episodes 1000 --hidden 64 --gcn_l
 
 ## Acknowledgments
 
-* **Dr.Chandra Shekar Lakshminarayan**
+* **Dr.Chandra Shekar Lakshminarayan, IIT Palakkad**
