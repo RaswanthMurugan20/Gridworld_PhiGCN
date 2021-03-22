@@ -1,9 +1,17 @@
+from __future__ import division
+from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.linalg as la
 import scipy.sparse as sp
 import seaborn as sns
+from pygcn.utils import normalize,sparse_mx_to_torch_sparse_tensor,load_data,accuracy
 import time
+import torch
+import torch.nn.functional as F
+import torch.optim as optim
+from pygcn.models import GCN
+
 
 class AdamOptim():
     def __init__(self, eta=0.01, beta1=0.9, beta2=0.999, epsilon=1e-8):
@@ -240,4 +248,70 @@ def ACPhi(param,reward,gcn_phi):
         valgcn.append(epilen) 
         maxigcn.append(minsteps)
         
-    return regcn,valgcn
+    return regcn,valgcn  
+
+def GraphCons(n,m,nt,mt,sam_len):
+    
+    i =  0
+    j =  0
+    states = []
+    policy = [0.25,0.25,0.25,0.25]
+    a = np.random.choice([0,1,2,3],size = 1,p = policy)
+    states.append(0)
+    epi_len = 0 
+    labels = np.zeros((n*m))
+    states.append(0)
+
+    # epi_len <= sam_len and
+    while ((i!=nt-1 or j!=mt-1)):
+        
+        i_t,j_t = StateSelector(n,m,i,j,a)
+        a_t = np.random.choice([0,1,2,3],size = 1,p = policy)
+        if (i_t == nt-1 and j_t == mt-1):
+            labels[m*i+j] = 1  
+        states[1] = m*i+j 
+        i = i_t
+        j = j_t
+        a = a_t
+        epi_len += 1
+
+    
+    return states,labels 
+
+def shortest_dist(n,m, goal_states):
+
+    # Adjacency Matrix
+    adj = np.zeros((n*m,n*m))
+    D = np.zeros((n*m,n*m))
+    
+    for i in range(n):
+        for j in range(m):
+            currcod = i*m + j
+            north,east,south,west = m*(i-1) + j, m*(i) + j+1, m*(i+1) + j, m*(i) + j-1
+
+            if i-1 >= 0:
+                adj[currcod,north] = 1
+            if j+1 <= m-1:
+                adj[currcod,east] = 1
+            if i+1 <= n-1:
+                adj[currcod,south] = 1
+            if j-1 >= 0:
+                adj[currcod,west] = 1
+        
+            D[currcod,currcod] = sum(adj[currcod,:])
+
+    D_hat = la.fractional_matrix_power(D, -0.5)
+    L_norm = np.identity(n*m) - np.dot(D_hat, adj).dot(D_hat)
+    eigvals, features = la.eig(L_norm)
+    features = normalize(sp.csr_matrix(features))
+    features = torch.FloatTensor(np.array(features.todense()))
+
+    adj = sp.coo_matrix(adj)
+
+    # Labels and index 
+
+    idx_train,labels = GraphCons(n,m,goal_states[0],goal_states[1],1500)
+    labels = torch.LongTensor(labels)
+    idx_train = torch.LongTensor(idx_train)
+
+    return adj, features, labels, idx_train

@@ -4,7 +4,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 from pygcn.models import GCN
 from pygcn.utils import normalize,sparse_mx_to_torch_sparse_tensor,load_data,accuracy
-from arguments import get_args
+from args import get_args
+from pygcn.GCN_train import *
 
 args = get_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -48,8 +49,8 @@ def main():
     gcn_phi = gcn_phi[:,1].reshape(n,m)
 
     
-    param1 = Params(n,m,nt,mt,gamma = args.gamma,args.qstep = 0.01,args.pstep = 0.005,args.alpha = 0,args.noepi = 2000)
-    param2 = Params(n,m,nt,mt,gamma = args.gamma,args.qstep = 0.01,args.pstep = 0.005,args.alpha = 1,args.noepi = 2000)
+    param1 = Params(n,m,nt,mt,gamma = args.gamma,qstep = args.qstep,pstep = args.pstep,alpha = 0,noepi = args.noepi)
+    param2 = Params(n,m,nt,mt,gamma = args.gamma,qstep = args.qstep,pstep = args.pstep,alpha = 1,noepi = args.noepi)
     
     regcn,valgcn = ACPhi(param1,reward,gcn_phi)
     reg,val = ACPhi(param2,reward,gcn_phi)
