@@ -42,7 +42,7 @@ $ python AC.py --n 15 --m 15 --nt 14 --mt 14 --episodes 1000 --hidden 64 --gcn_l
 
 ![Reward Propagation](/images/1.png)
 ![Regret Plot](/images/2.png)
-![Loss Plot](/images/2.png)
+![Loss Plot](/images/3.png)
 
 
 ## Built With
