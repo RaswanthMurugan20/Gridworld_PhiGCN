@@ -6,11 +6,11 @@ The repository contains the code for running the experiments in the paper [Rewar
 
 For a quick start clone the repository, and type the following command.
 ```
-git clone <repo link>
+$ git clone <repo link>
 ```
 
 ```
-
+$ python AC.py 
 ```
 
 
@@ -18,25 +18,31 @@ git clone <repo link>
 
 ```python
 # PyTorch
-conda install pytorch torchvision -c soumith
+$ conda install pytorch torchvision -c soumith
 
 # Other requirements
-pip install -r requirements.txt
+$ pip install -r requirements.txt
 
 #Installing PyGCN
-python setup_gcn.py install
+$ python setup_gcn.py install
 ```
 
 
 
 ## Usage
 
+### GridWorld
+
+
 ```
-python
+$ python AC.py --n 15 --m 15 --nt 14 --mt 14 --episodes 1000 --hidden 64 --gcn_lambda 2 --lr 0.01 --gcn_epochs 100
 ```
 
 ## Results
 
+![Reward Propagation](/images/1.png)
+![Regret Plot](/images/2.png)
+![Loss Plot](/images/3.png)
 
 
 ## Built With
