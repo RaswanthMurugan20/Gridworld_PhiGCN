@@ -17,18 +17,9 @@ import scipy.linalg as la
 from modelutils import shortest_dist
 
 
-def update_graph(n,m,args,model,optimizer):
-    
-    
-    # adj, full_adj, features, labels, idx_train, idx_val, idx_test,edges = load_data()
-    adj, features, labels, idx_train = shortest_dist(n,m,[n,m])
-    
+def update_graph(n,m,args,model,optimizer,features,labels,states,adj,degree):
 
-    adj = adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
-    deg = np.diag(adj.toarray().sum(axis=1))
-    laplacian = torch.from_numpy((deg - adj.toarray()).astype(np.float32))
-    adj = normalize(sp.csr_matrix(adj) + sp.eye(adj.shape[0]))
-    adj = sparse_mx_to_torch_sparse_tensor(adj)
+    features, adj, deg, laplacian, labels, idx_train = GCN_inputs(features,labels,states,adj,degree)
 
     args.cuda = not args.no_cuda and torch.cuda.is_available()
     if args.cuda and torch.cuda.is_available():

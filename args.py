@@ -32,7 +32,7 @@ def get_args():
                     help='Weight decay (L2 loss on parameters).')
     parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='Disables CUDA training.')
-    parser.add_argument('--gcn_epochs', type=int, default= 20,
+    parser.add_argument('--gcn_epochs', type=int, default= 1,
                     help='Number of epochs to train.')  
     parser.add_argument('--gcn_epi', type=int, default= 40,
                     help='Number of episodes to train gcn')  

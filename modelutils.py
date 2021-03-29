@@ -19,7 +19,32 @@ class AdamOptim():
         self.beta1 = beta1
         self.beta2 = beta2
         self.epsilon = epsilon
-        self.eta = eta
+       def GraphCons(n,m,nt,mt,A,D,sam_len):
+    
+    i =  0
+    j =  0
+    states = []
+    policy = [0.25,0.25,0.25,0.25]
+    a = np.random.choice([0,1,2,3],size = 1,p = policy)
+    states.append(0)
+    epi_len = 0 
+    labels = np.zeros((n*m))
+    states.append(0)
+    
+    for episode in range(sam_len):
+        
+        i_t,j_t = StateSelector(n,m,i,j,a)
+        a_t = np.random.choice([0,1,2,3],size = 1,p = policy)
+        A[m*i+j,m*i_t+j_t] = 1
+        D[m*i+j,m*i+j] += 1
+        if (i_t == nt-1 and j_t == mt-1):
+            labels[m*i+j] = 1  
+        states[1] = m*i+j 
+        i = i_t
+        j = j_t
+        a = a_t
+        
+    return A,D,states,labels   self.eta = eta
     def update(self, t, w, dw):
         self.m_dw = self.beta1*self.m_dw + (1-self.beta1)*dw
         self.v_dw = self.beta2*self.v_dw + (1-self.beta2)*(dw**2)
@@ -55,33 +80,6 @@ class Params:
         self.verbose = verbose
 
 
-
-def GraphConfig(n,m):
-    A = np.zeros((n*m,n*m))
-    D = np.zeros((n*m,n*m))    
-
-    for i in range(n):
-        for j in range(m):
-            currcod = i*m + j
-            north,east,south,west = m*(i-1) + j, m*(i) + j+1, m*(i+1) + j, m*(i) + j-1
- 
-            if i-1 >= 0:
-                A[currcod,north] = 1
-            if j+1 <= m-1:
-                A[currcod,east] = 1
-            if i+1 <= n-1:
-                A[currcod,south] = 1
-            if j-1 >= 0:
-                A[currcod,west] = 1
-        
-            D[currcod,currcod] = sum(A[currcod,:])
-
-    D_hat = la.fractional_matrix_power(D, -0.5)
-    L_norm = np.identity(n*m) - np.dot(D_hat, A).dot(D_hat)
-    eigvals, eigvecs = la.eig(L_norm)
-    # eigvals, eigvecs = la.eig(D - A)
-    return eigvecs,eigvals,A,D
-
 def Begin(n,m,eigvecs):
     bot = []
     for i in range(n):
@@ -90,7 +88,6 @@ def Begin(n,m,eigvecs):
             temp.append(Agent(n,m,i,j,eigvecs)) 
         bot.append(temp)  
     return np.array(bot) 
-
 
 def ActionSelector(bot,i,j,theta,k):
     
@@ -178,7 +175,7 @@ def PlotAnalysis(interval,reg,val,regcn,valgcn,gcn_phi):
     plt.show()
 
         
-def ACPhi(param,reward,gcn_phi):
+def ACPhi(param,reward):
     
     n = param.n
     m = param.m
@@ -193,27 +190,42 @@ def ACPhi(param,reward,gcn_phi):
     theta = param.theta
     verbose = param.verbose
     
-    features,_,_,_ = GraphConfig(n,m) #n,m 
-    bot = Begin(n,m,features) #n,m
+    A = np.zeros((n*m,n*m))
+    D = np.zeros((n*m,n*m))
+    gcn_phi = np.zeros((n,m))
+    
     adam1 = AdamOptim(eta=pstep)
     adam2 = AdamOptim(eta=qstep)
-    
-    
+        
     valgcn = []
     regcn = []
     maxigcn = []
     
+    torch.set_num_threads(1)
+    device = torch.device("cuda:0" if args.cuda else "cpu")
+    gcn_model = GCN(nfeat=n*m, nhid=args.hidden)
+    gcn_model.to(device)
+    optimizer = optim.Adam(gcn_model.parameters(),lr=args.lr, weight_decay=args.weight_decay)
+    
     for iterations in range(noepi):
         i = 0
         j = 0
-#         i =  np.random.randint(n,size = 1)[0]
-#         j =  np.random.randint(m,size = 1)[0]
         
         minsteps = n-1-i + m-1-j
         rew = 0
         epilen = 0
+        
+        if noepi % 1:
+            A,D,idx_train,labels = GraphCons(n,m,nt,mt,A,D,100)
+            features,bot = GraphConfig(n,m,A,D)
+            update_graph(n,m,args,gcn_model,optimizer,features,labels,idx_train,A,D)
+            gcn_features, gcn_adj, _, _, _, _ = GCN_inputs(features,labels,states,A,D)
+            gcn_phi = gcn_model(gcn_features,gcn_adj).clone().cpu().detach().numpy()[:,1].reshape(n,m)
+            
     
         a = ActionSelector(bot,i,j,theta,(iterations+1))
+        
+        
         
         while (i!=nt-1 or j!=mt-1):
             
@@ -221,6 +233,7 @@ def ACPhi(param,reward,gcn_phi):
             a_t = ActionSelector(bot,i_t,j_t,theta,(iterations+1))
             q_t = np.dot(bot[i,j].x[a],w) 
             q_t1 = np.dot(bot[i_t,j_t].x[a_t],w)
+            
             
             delta2 = reward[i,j,a] + gamma*(q_t1 + gcn_phi[i_t,j_t]) - (q_t + gcn_phi[i,j])
             delta1 = reward[i,j,a] + gamma*q_t1 - q_t 
@@ -248,9 +261,18 @@ def ACPhi(param,reward,gcn_phi):
         valgcn.append(epilen) 
         maxigcn.append(minsteps)
         
-    return regcn,valgcn  
+    return regcn,valgcn,gcn_phi
 
-def GraphCons(n,m,nt,mt,sam_len):
+def GraphConfig(n,m,A,D):
+    
+    D_hat = la.fractional_matrix_power(D, -0.5)
+    L_norm = np.identity(n*m) - np.dot(D_hat, A).dot(D_hat)
+    _, features = la.eig(L_norm)
+    bot = Begin(n,m,features) 
+    
+    return features,bot
+
+def GraphCons(n,m,nt,mt,A,D,sam_len):
     
     i =  0
     j =  0
@@ -261,22 +283,39 @@ def GraphCons(n,m,nt,mt,sam_len):
     epi_len = 0 
     labels = np.zeros((n*m))
     states.append(0)
-
-    # epi_len <= sam_len and
-    while ((i!=nt-1 or j!=mt-1)):
+    
+    for episode in range(sam_len):
         
         i_t,j_t = StateSelector(n,m,i,j,a)
         a_t = np.random.choice([0,1,2,3],size = 1,p = policy)
+        A[m*i+j,m*i_t+j_t] = 1
+        D[m*i+j,m*i+j] += 1
         if (i_t == nt-1 and j_t == mt-1):
             labels[m*i+j] = 1  
         states[1] = m*i+j 
         i = i_t
         j = j_t
         a = a_t
-        epi_len += 1
+        
+    return A,D,states,labels  
 
+def GCN_inputs(features,labels,states,A,D):
     
-    return states,labels 
+    gcn_features = normalize(sp.csr_matrix(features))
+    gcn_features = torch.FloatTensor(np.array(gcn_features.todense()))
+    
+    adj = sp.coo_matrix(A) 
+    adj = adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
+    deg = np.diag(adj.toarray().sum(axis=1))
+    laplacian = torch.from_numpy((deg - adj.toarray()).astype(np.float32))
+    adj = normalize(sp.csr_matrix(adj) + sp.eye(adj.shape[0]))
+    adj = sparse_mx_to_torch_sparse_tensor(adj)
+    
+    labels = torch.LongTensor(labels)
+    idx_train = torch.LongTensor(states)
+    
+    return gcn_features, adj, deg, laplacian, labels, idx_train
+    
 
 def shortest_dist(n,m, goal_states):
 
