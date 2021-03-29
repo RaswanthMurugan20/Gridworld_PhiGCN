@@ -19,32 +19,7 @@ class AdamOptim():
         self.beta1 = beta1
         self.beta2 = beta2
         self.epsilon = epsilon
-       def GraphCons(n,m,nt,mt,A,D,sam_len):
-    
-    i =  0
-    j =  0
-    states = []
-    policy = [0.25,0.25,0.25,0.25]
-    a = np.random.choice([0,1,2,3],size = 1,p = policy)
-    states.append(0)
-    epi_len = 0 
-    labels = np.zeros((n*m))
-    states.append(0)
-    
-    for episode in range(sam_len):
-        
-        i_t,j_t = StateSelector(n,m,i,j,a)
-        a_t = np.random.choice([0,1,2,3],size = 1,p = policy)
-        A[m*i+j,m*i_t+j_t] = 1
-        D[m*i+j,m*i+j] += 1
-        if (i_t == nt-1 and j_t == mt-1):
-            labels[m*i+j] = 1  
-        states[1] = m*i+j 
-        i = i_t
-        j = j_t
-        a = a_t
-        
-    return A,D,states,labels   self.eta = eta
+        self.eta = eta
     def update(self, t, w, dw):
         self.m_dw = self.beta1*self.m_dw + (1-self.beta1)*dw
         self.v_dw = self.beta2*self.v_dw + (1-self.beta2)*(dw**2)
@@ -64,7 +39,7 @@ class Agent:
         self.x = [north,east,south,west]
         
 class Params:
-    def __init__(self,n,m,nt,mt,gamma,qstep,pstep,alpha,noepi,verbose = True):
+    def __init__(self,n,m,nt,mt,gamma,qstep,pstep,alpha,noepi,verbose):
                
         self.gamma = gamma 
         self.qstep = qstep 
@@ -79,16 +54,6 @@ class Params:
         self.noepi = noepi
         self.verbose = verbose
 
-
-def Begin(n,m,eigvecs):
-    bot = []
-    for i in range(n):
-        temp = []
-        for j in range(m):
-            temp.append(Agent(n,m,i,j,eigvecs)) 
-        bot.append(temp)  
-    return np.array(bot) 
-
 def ActionSelector(bot,i,j,theta,k):
     
     x = np.random.uniform(0,1)
@@ -101,7 +66,6 @@ def ActionSelector(bot,i,j,theta,k):
         
     return int(action)
 
-  
 def StateSelector(n,m,i,j,action):
           
     x, y = i, j 
@@ -124,7 +88,7 @@ def StateSelector(n,m,i,j,action):
     elif y < 0:
         y = 0 
           
-    return int(x),int(y)     
+    return int(x),int(y)        
   
 def PolicyUpdate(bot,i,j,theta):
     
@@ -173,7 +137,6 @@ def PlotAnalysis(interval,reg,val,regcn,valgcn,gcn_phi):
     plt.plot(range(interval),valgcn[:interval],'b', label='AC + Phi')
     plt.legend()
     plt.show()
-
         
 def ACPhi(param,reward):
     
@@ -215,7 +178,7 @@ def ACPhi(param,reward):
         rew = 0
         epilen = 0
         
-        if noepi % 1:
+        if noepi % N:
             A,D,idx_train,labels = GraphCons(n,m,nt,mt,A,D,100)
             features,bot = GraphConfig(n,m,A,D)
             update_graph(n,m,args,gcn_model,optimizer,features,labels,idx_train,A,D)
@@ -297,7 +260,7 @@ def GraphCons(n,m,nt,mt,A,D,sam_len):
         j = j_t
         a = a_t
         
-    return A,D,states,labels  
+    return A,D,states,labels 
 
 def GCN_inputs(features,labels,states,A,D):
     
@@ -315,42 +278,13 @@ def GCN_inputs(features,labels,states,A,D):
     idx_train = torch.LongTensor(states)
     
     return gcn_features, adj, deg, laplacian, labels, idx_train
-    
 
-def shortest_dist(n,m, goal_states):
 
-    # Adjacency Matrix
-    adj = np.zeros((n*m,n*m))
-    D = np.zeros((n*m,n*m))
-    
+def Begin(n,m,eigvecs):
+    bot = []
     for i in range(n):
+        temp = []
         for j in range(m):
-            currcod = i*m + j
-            north,east,south,west = m*(i-1) + j, m*(i) + j+1, m*(i+1) + j, m*(i) + j-1
-
-            if i-1 >= 0:
-                adj[currcod,north] = 1
-            if j+1 <= m-1:
-                adj[currcod,east] = 1
-            if i+1 <= n-1:
-                adj[currcod,south] = 1
-            if j-1 >= 0:
-                adj[currcod,west] = 1
-        
-            D[currcod,currcod] = sum(adj[currcod,:])
-
-    D_hat = la.fractional_matrix_power(D, -0.5)
-    L_norm = np.identity(n*m) - np.dot(D_hat, adj).dot(D_hat)
-    eigvals, features = la.eig(L_norm)
-    features = normalize(sp.csr_matrix(features))
-    features = torch.FloatTensor(np.array(features.todense()))
-
-    adj = sp.coo_matrix(adj)
-
-    # Labels and index 
-
-    idx_train,labels = GraphCons(n,m,goal_states[0],goal_states[1],1500)
-    labels = torch.LongTensor(labels)
-    idx_train = torch.LongTensor(idx_train)
-
-    return adj, features, labels, idx_train
+            temp.append(Agent(n,m,i,j,eigvecs)) 
+        bot.append(temp)  
+    return np.array(bot) 
