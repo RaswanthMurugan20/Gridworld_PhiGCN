@@ -11,6 +11,7 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from pygcn.models import GCN
+from pygcn.GCN_train import update_graph
 
 
 class AdamOptim():
