@@ -155,7 +155,7 @@ def ACPhi(param,reward,args):
     N = 1
     
     A = np.zeros((n*m,n*m))
-    D = np.zeros((n*m,n*m))
+    D = np.eye(n*m)
     gcn_phi = np.zeros((n,m))
     
     adam1 = AdamOptim(eta=pstep)
@@ -238,7 +238,7 @@ def GraphConfig(n,m,A,D):
         L_norm = np.identity(n*m) - np.dot(D_hat, A).dot(D_hat)
         _, features = la.eig(L_norm)
     
-    bot = Begin(n,m,features) 
+    bot = Begin(n,m,features.real) 
     
     return features,bot
 
