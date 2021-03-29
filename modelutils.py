@@ -165,8 +165,6 @@ def ACPhi(param,reward,args):
     regcn = []
     maxigcn = []
 
-    bot = Begin(n,m,features)
-
     features,bot = GraphConfig(n,m,A,D)
     
     torch.set_num_threads(1)
