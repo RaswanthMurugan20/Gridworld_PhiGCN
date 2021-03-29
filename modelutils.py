@@ -164,6 +164,9 @@ def ACPhi(param,reward,args):
     valgcn = []
     regcn = []
     maxigcn = []
+
+
+    features,bot = GraphConfig(n,m,A,D)
     
     torch.set_num_threads(1)
     device = torch.device("cuda:0" if args.cuda else "cpu")
