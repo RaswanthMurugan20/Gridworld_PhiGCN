@@ -152,6 +152,7 @@ def ACPhi(param,reward,args):
     w = param.w
     theta = param.theta
     verbose = param.verbose
+    N = 1
     
     A = np.zeros((n*m,n*m))
     D = np.zeros((n*m,n*m))
