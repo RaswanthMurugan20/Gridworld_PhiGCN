@@ -165,6 +165,7 @@ def ACPhi(param,reward,args):
     regcn = []
     maxigcn = []
 
+    bot = Begin(n,m,features)
 
     features,bot = GraphConfig(n,m,A,D)
     
@@ -182,7 +183,7 @@ def ACPhi(param,reward,args):
         rew = 0
         epilen = 0
         
-        if noepi % N:
+        if noepi % N == 0:
             A,D,idx_train,labels = GraphCons(n,m,nt,mt,A,D,100)
             features,bot = GraphConfig(n,m,A,D)
             update_graph(n,m,args,gcn_model,optimizer,features,labels,idx_train,A,D)
@@ -231,10 +232,14 @@ def ACPhi(param,reward,args):
     return regcn,valgcn,gcn_phi
 
 def GraphConfig(n,m,A,D):
+
+    if np.sum(A) == 0:
+        features  = np.random.uniform(size = (n*m,n*m))
+    else:
+        D_hat = la.fractional_matrix_power(D, -0.5)
+        L_norm = np.identity(n*m) - np.dot(D_hat, A).dot(D_hat)
+        _, features = la.eig(L_norm)
     
-    D_hat = la.fractional_matrix_power(D, -0.5)
-    L_norm = np.identity(n*m) - np.dot(D_hat, A).dot(D_hat)
-    _, features = la.eig(L_norm)
     bot = Begin(n,m,features) 
     
     return features,bot
