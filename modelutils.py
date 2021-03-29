@@ -39,7 +39,7 @@ class Agent:
         self.x = [north,east,south,west]
         
 class Params:
-    def __init__(self,n,m,nt,mt,gamma,qstep,pstep,alpha,noepi,verbose):
+    def __init__(self,n,m,nt,mt,gamma,qstep,pstep,alpha,noepi,verbose =  False):
                
         self.gamma = gamma 
         self.qstep = qstep 
@@ -138,7 +138,7 @@ def PlotAnalysis(interval,reg,val,regcn,valgcn,gcn_phi):
     plt.legend()
     plt.show()
         
-def ACPhi(param,reward):
+def ACPhi(param,reward,args):
     
     n = param.n
     m = param.m
