@@ -223,7 +223,7 @@ def ACPhi(param,reward,args):
             print(rew)
             print(iterations)
 
-        print (A,'\n\n')
+        print(iterations,D-A,'\n\n')
     
         regcn.append(- sum(maxigcn) + sum(valgcn))
         valgcn.append(epilen) 
