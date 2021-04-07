@@ -5,7 +5,6 @@ import torch.optim as optim
 from pygcn.models import GCN
 from pygcn.utils import normalize,sparse_mx_to_torch_sparse_tensor,load_data,accuracy
 from args import get_args
-from pygcn.GCN_train import *
 
 args = get_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()

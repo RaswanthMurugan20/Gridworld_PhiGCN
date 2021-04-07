@@ -4,10 +4,6 @@ from __future__ import print_function
 import time
 import argparse
 import numpy as np
-import sys
-
-sys.path.append('../')
-
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
@@ -17,7 +13,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import scipy.sparse as sp
 import scipy.linalg as la
-from modelutils import GCN_inputs
 
 
 
