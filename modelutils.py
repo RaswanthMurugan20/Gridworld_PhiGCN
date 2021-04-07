@@ -152,7 +152,7 @@ def ACPhi(param,reward,args):
     w = param.w
     theta = param.theta
     verbose = param.verbose
-    N = 1
+    N = 10
     
     A = np.zeros((n*m,n*m))
     D = np.eye(n*m)
@@ -222,6 +222,8 @@ def ACPhi(param,reward,args):
             Qvalue(n,m,bot,theta)
             print(rew)
             print(iterations)
+
+        print (A,'\n\n')
     
         regcn.append(- sum(maxigcn) + sum(valgcn))
         valgcn.append(epilen) 
