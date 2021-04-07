@@ -17,7 +17,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import scipy.sparse as sp
 import scipy.linalg as la
-from RewardPropagation.modelutils import GCN_inputs
+from modelutils import GCN_inputs
 
 
 
