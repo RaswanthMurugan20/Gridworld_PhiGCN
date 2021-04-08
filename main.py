@@ -51,8 +51,8 @@ def main():
     param1 = Params(n,m,nt,mt,gamma = args.gamma,qstep = args.qstep,pstep = args.pstep,alpha = 0,noepi = args.noepi)
     param2 = Params(n,m,nt,mt,gamma = args.gamma,qstep = args.qstep,pstep = args.pstep,alpha = 1,noepi = args.noepi)
     
-    regcn,valgcn = ACPhi(param1,reward,args)
-    reg,val = ACPhi(param2,reward,args)
+    regcn, valgcn, gcn_phi = ACPhi(param1,reward,args)
+    reg, val, _ = ACPhi(param2,reward,args)
 
     PlotAnalysis(param1.noepi,reg,val,regcn,valgcn,gcn_phi)
 
