@@ -248,10 +248,10 @@ def GraphCons(n,m,nt,mt,A,D,sam_len):
     
     i =  0
     j =  0
-    states = []
-    policy = [0.25,0.25,0.25,0.25]
-    a = np.random.choice([0,1,2,3],size = 1,p = policy)
-    states.append(0)
+    states = [] 
+    policy = [0.25,0.25,0.25,0.25] 
+    a = np.random.choice([0,1,2,3],size = 1,p = policy) 
+    states.append(0) 
     epi_len = 0 
     labels = np.zeros((n*m))
     states.append(0)
@@ -261,14 +261,16 @@ def GraphCons(n,m,nt,mt,A,D,sam_len):
         i_t,j_t = StateSelector(n,m,i,j,a)
         a_t = np.random.choice([0,1,2,3],size = 1,p = policy)
         A[m*i+j,m*i_t+j_t] = 1
-        D[m*i+j,m*i+j] += 1
         if (i_t == nt-1 and j_t == mt-1):
             labels[m*i+j] = 1  
         states[1] = m*i+j 
         i = i_t
         j = j_t
         a = a_t
-        
+
+    
+    D = np.diag(A.toarray().sum(axis=1))
+
     return A,D,states,labels 
 
 def GCN_inputs(features,labels,states,A,D):
