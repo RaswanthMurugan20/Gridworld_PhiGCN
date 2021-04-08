@@ -269,7 +269,7 @@ def GraphCons(n,m,nt,mt,A,D,sam_len):
         a = a_t
 
     
-    D = np.diag(A.toarray().sum(axis=1))
+    D = np.diag(A.sum(axis=1))
 
     return A,D,states,labels 
 
