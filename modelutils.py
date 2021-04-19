@@ -237,8 +237,9 @@ def GraphConfig(n,m,A,D):
     if np.sum(A) == 0:
         features  = np.random.uniform(size = (n*m,n*m))
     else:
-        D_hat = la.fractional_matrix_power(D, -0.5)
-        L_norm = np.identity(n*m) - np.dot(D_hat, A).dot(D_hat)
+        # D_hat = la.fractional_matrix_power(D, -0.5)
+        # L_norm = np.identity(n*m) - np.dot(D_hat, A).dot(D_hat)
+        L_norm = D - A
         _, features = la.eig(L_norm)
     
     bot = Begin(n,m,features.real) 
