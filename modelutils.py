@@ -181,13 +181,14 @@ def ACPhi(param,reward,args):
         rew = 0
         epilen = 0
         
-        if noepi % N == 0 and alpha != 1:
+        if noepi % N == 0:
             A,D,idx_train,labels = GraphCons(n,m,nt,mt,A,D,500)
             features,bot = GraphConfig(n,m,A,D)
-            update_graph(n,m,args,gcn_model,optimizer,features,labels,idx_train,A,D)
-            gcn_features, gcn_adj, _, _, _, _ = GCN_inputs(features,labels,idx_train,A,D)
-            gcn_phi = gcn_model(gcn_features,gcn_adj).clone().cpu().detach().numpy()[:,1].reshape(n,m)
-            gcn_phi = np.exp(gcn_phi)
+            if alpha != 1:
+                update_graph(n,m,args,gcn_model,optimizer,features,labels,idx_train,A,D)
+                gcn_features, gcn_adj, _, _, _, _ = GCN_inputs(features,labels,idx_train,A,D)
+                gcn_phi = gcn_model(gcn_features,gcn_adj).clone().cpu().detach().numpy()[:,1].reshape(n,m)
+                gcn_phi = np.exp(gcn_phi)
 
     
         a = ActionSelector(bot,i,j,theta,(iterations+1))
