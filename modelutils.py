@@ -152,7 +152,7 @@ def ACPhi(param,reward,args):
     w = param.w
     theta = param.theta
     verbose = param.verbose
-    N = 10
+    N = 5
     
     A = np.zeros((n*m,n*m))
     D = np.eye(n*m)
@@ -181,8 +181,8 @@ def ACPhi(param,reward,args):
         rew = 0
         epilen = 0
         
-        if noepi % N == 0:
-            A,D,idx_train,labels = GraphCons(n,m,nt,mt,A,D,(n*m)**2)
+        if noepi % N == 0 and alpha != 1:
+            A,D,idx_train,labels = GraphCons(n,m,nt,mt,A,D,500)
             features,bot = GraphConfig(n,m,A,D)
             update_graph(n,m,args,gcn_model,optimizer,features,labels,idx_train,A,D)
             gcn_features, gcn_adj, _, _, _, _ = GCN_inputs(features,labels,idx_train,A,D)
@@ -258,8 +258,8 @@ def GraphCons(n,m,nt,mt,A,D,sam_len):
     labels = np.zeros((n*m))
     states.append(0)
     
-    for episode in range(sam_len):
-        
+    while i!=nt-1 or j!=mt-1:
+
         i_t,j_t = StateSelector(n,m,i,j,a)
         a_t = np.random.choice([0,1,2,3],size = 1,p = policy)
         A[m*i+j,m*i_t+j_t] = 1
