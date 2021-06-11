@@ -187,8 +187,11 @@ def ACPhi(param,reward,args):
             if alpha != 1:
                 update_graph(n,m,args,gcn_model,optimizer,features,labels,idx_train,A,D)
                 gcn_features, gcn_adj, _, _, _, _ = GCN_inputs(features,labels,idx_train,A,D)
-                gcn_phi = gcn_model(gcn_features,gcn_adj).clone().cpu().detach().numpy()[:,1].reshape(n,m)
+                temp,node_temp = gcn_model(gcn_features.to(device),gcn_adj.to(device))
+                gcn_phi = temp.clone().cpu().detach().numpy()[:,1].reshape(n,m)
                 gcn_phi = np.exp(gcn_phi)
+                node_rep = node_temp.clone().cpu().detach().numpy()
+                print(node_rep)
 
     
         a = ActionSelector(bot,i,j,theta,(iterations+1))
@@ -233,15 +236,29 @@ def ACPhi(param,reward,args):
         
     return regcn,valgcn,gcn_phi
 
+def FeatureClac(i,j):
+
+    if i > j:
+        mod = i - j
+    else:j
+        mod = j - i
+
+    return [1,i,j,mod,i*j,i**2,j**2,i**2+j**2,(i+j)**2]
+
 def GraphConfig(n,m,A,D):
 
     if np.sum(A) == 0:
         features  = np.random.uniform(size = (n*m,n*m))
     else:
-        # D_hat = la.fractional_matrix_power(D, -0.5)
-        # L_norm = np.identity(n*m) - np.dot(D_hat, A).dot(D_hat)
-        L_norm = D - A
-        _, features = la.eig(L_norm)
+        # # D_hat = la.fractional_matrix_power(D, -0.5)
+        # # L_norm = np.identity(n*m) - np.dot(D_hat, A).dot(D_hat)
+        # L_norm = D - A
+        # _, features = la.eig(L_norm) 
+        
+        features = np.zeros(n*m,9)
+        for i in range(n):
+            for j in range(m):
+                features[m*i + j,:] = FeatureClac(i,j)
     
     bot = Begin(n,m,features.real) 
     
@@ -321,7 +338,7 @@ def update_graph(n,m,args,model,optimizer,features,labels,states,adj,degree):
         t = time.time()
         model.train()
         optimizer.zero_grad()
-        output = model(features, adj)
+        output,_ = model(features, adj)
         loss_train = F.nll_loss(output[idx_train], labels[idx_train])
         soft_out= torch.unsqueeze(torch.nn.functional.softmax(output,dim=1)[:,1],1)
         loss_reg  = torch.mm(torch.mm(torch.transpose(soft_out, 0, 1),laplacian),soft_out)
