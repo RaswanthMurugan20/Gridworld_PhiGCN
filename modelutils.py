@@ -183,7 +183,7 @@ def ACPhi(param,reward,args):
         rew = 0
         epilen = 0
         
-        if noepi % N == 0:
+        if iterations % N == 0:
             A,D,idx_train,labels = GraphCons(n,m,nt,mt,A,D,500)
             features,bot = GraphConfig(n,m,A,D)
             if alpha != 1:
