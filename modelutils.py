@@ -175,6 +175,7 @@ def ACPhi(param,reward,args):
     optimizer = optim.Adam(gcn_model.parameters(),lr=args.lr, weight_decay=args.weight_decay)
     
     for iterations in range(noepi):
+        print(noepi)
         i = 0
         j = 0
         
@@ -192,12 +193,9 @@ def ACPhi(param,reward,args):
                 gcn_phi = temp.clone().cpu().detach().numpy()[:,1].reshape(n,m)
                 gcn_phi = np.exp(gcn_phi)
                 node_rep = node_temp.clone().cpu().detach().numpy()
-                print(node_rep)
 
     
-        a = ActionSelector(bot,i,j,theta,(iterations+1))
-        
-        
+        a = ActionSelector(bot,i,j,theta,(iterations+1))        
         
         while (i!=nt-1 or j!=mt-1):
             
@@ -232,7 +230,9 @@ def ACPhi(param,reward,args):
         regcn.append(- sum(maxigcn) + sum(valgcn))
         valgcn.append(epilen) 
         maxigcn.append(minsteps)
-        
+
+    
+    print(node_rep)        
     return regcn,valgcn,gcn_phi
 
 def FeatureClac(i,j):
