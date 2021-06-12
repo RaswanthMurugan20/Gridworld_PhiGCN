@@ -175,7 +175,7 @@ def ACPhi(param,reward,args):
     optimizer = optim.Adam(gcn_model.parameters(),lr=args.lr, weight_decay=args.weight_decay)
     
     for iterations in range(noepi):
-        print(noepi)
+        print(iterations)
         i = 0
         j = 0
         
