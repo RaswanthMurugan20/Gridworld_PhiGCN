@@ -169,7 +169,8 @@ def ACPhi(param,reward,args):
     
     torch.set_num_threads(1)
     device = torch.device("cuda:0" if args.cuda else "cpu")
-    gcn_model = GCN(nfeat=n*m, nhid=args.hidden)
+    # gcn_model = GCN(nfeat=n*m, nhid=args.hidden)
+    gcn_model = GCN(nfeat=9, nhid=args.hidden)
     gcn_model.to(device)
     optimizer = optim.Adam(gcn_model.parameters(),lr=args.lr, weight_decay=args.weight_decay)
     
