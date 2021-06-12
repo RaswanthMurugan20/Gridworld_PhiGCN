@@ -228,8 +228,6 @@ def ACPhi(param,reward,args):
             Qvalue(n,m,bot,theta)
             print(rew)
             print(iterations)
-
-        print(iterations,D-A,'\n\n')
     
         regcn.append(- sum(maxigcn) + sum(valgcn))
         valgcn.append(epilen) 
