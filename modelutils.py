@@ -240,7 +240,7 @@ def FeatureClac(i,j):
 
     if i > j:
         mod = i - j
-    else:j
+    else:
         mod = j - i
 
     return [1,i,j,mod,i*j,i**2,j**2,i**2+j**2,(i+j)**2]
@@ -255,7 +255,7 @@ def GraphConfig(n,m,A,D):
         # L_norm = D - A
         # _, features = la.eig(L_norm) 
         
-        features = np.zeros(n*m,9)
+        features = np.zeros((n*m,9))
         for i in range(n):
             for j in range(m):
                 features[m*i + j,:] = FeatureClac(i,j)
